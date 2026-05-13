@@ -1,0 +1,37 @@
+#!/bin/bash
+
+PIDFILE="/tmp/gpu-screen-recorder.pid"
+OUTDIR="$HOME/Videos"
+FPS=30
+
+# This line finds your default desktop audio "monitor" automatically
+AUDIO_DEVICE=$(pactl get-default-sink).monitor
+
+if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    echo "Stopping recording..."
+    kill "$(cat "$PIDFILE")"
+    rm -f "$PIDFILE"
+    notify-send "Screen Recorder" "Recording stopped"
+else
+    mkdir -p "$OUTDIR"
+    echo "Starting recording with audio device: $AUDIO_DEVICE"
+
+    # We add '|| rm $PIDFILE' so if it fails immediately, it cleans up
+    gpu-screen-recorder \
+        -w screen \
+        -f "$FPS" \
+        -a "$AUDIO_DEVICE" \
+        -o "$OUTDIR/recording_$(date +%Y-%m-%d_%H-%M-%S).mp4" &
+
+    GSR_PID=$!
+    echo $GSR_PID > "$PIDFILE"
+
+    # Brief sleep to see if it crashes immediately
+    sleep 1
+    if ! kill -0 $GSR_PID 2>/dev/null; then
+        notify-send "Screen Recorder" "ERROR: Failed to start. Check audio device."
+        rm -f "$PIDFILE"
+    else
+        notify-send "Screen Recorder" "Recording started ($FPS FPS)"
+    fi
+fi

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+PIDFILE="/tmp/dotool_autoclick.pid"
+
+if [[ -f "$PIDFILE" ]]; then
+  # Grab the PID of the background subshell
+  PID=$(cat "$PIDFILE")
+
+  # Kill child processes (the sleep loop and dotool)
+  pkill -P "$PID" 2>/dev/null
+  # Kill the parent subshell itself
+  kill "$PID" 2>/dev/null
+
+  rm -f "$PIDFILE"
+  notify-send "Autoclicker OFF"
+  exit 0
+fi
+
+# Wrap the loop AND dotool in a single background subshell
+(
+  while true; do
+    printf "click 1\n"
+    sleep 0.01
+  done | dotool
+) &
+
+# Save the background subshell's PID
+echo $! > "$PIDFILE"
+notify-send "Autoclicker ON"

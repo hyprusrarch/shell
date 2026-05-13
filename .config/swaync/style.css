@@ -1,0 +1,132 @@
+/* Tokyo Night Palette */
+@define-color bg #1a1b26;
+@define-color bg-alt #24283b;
+@define-color fg #c0caf5;
+@define-color selection #565f89;
+@define-color border #24283b;
+@define-color accent #7aa2f7;
+@define-color critical #f7768e;
+@define-color warning #e0af68;
+@define-color success #9ece6a;
+@define-color purple #bb9af7;
+@define-color cyan #89dceb;
+
+* {
+  font-family: "CaskaydiaCove Nerd Font", "JetBrains Mono", sans-serif;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Control Center */
+.control-center {
+  background: @bg;
+  border: 1px solid @border;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* Notifications */
+.notification {
+  background: @bg-alt;
+  border: 1px solid @border;
+  border-radius: 8px;
+  margin: 4px;
+}
+
+.notification-row {
+  margin-bottom: 8px;
+}
+
+.summary {
+  color: @accent;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.body {
+  color: @fg;
+  font-size: 13px;
+}
+
+.app-name {
+  color: @purple;
+  font-size: 11px;
+}
+
+/* Reply Support Elements */
+.notification-reply-container {
+  background: @bg;
+  border: 1px solid @border;
+  border-radius: 4px;
+  margin-top: 8px;
+  padding: 6px;
+}
+
+.notification-reply-entry {
+  background: @bg-alt;
+  color: @fg;
+  border: 1px solid @border;
+  border-radius: 4px;
+  padding: 6px;
+  caret-color: @accent;
+}
+
+.notification-reply-button {
+  background: @bg-alt;
+  color: @success;
+  border: 1px solid @border;
+  border-radius: 4px;
+  margin-left: 6px;
+  padding: 4px 10px;
+}
+
+.notification-reply-button:hover {
+  background: @accent;
+  color: @bg;
+}
+
+/* Widget Title & Buttons */
+.widget-title {
+  color: @accent;
+  margin: 8px;
+  font-weight: bold;
+}
+
+.widget-title > button {
+  background: @bg-alt;
+  color: @critical;
+  border-radius: 4px;
+  padding: 4px 12px;
+  border: 1px solid @border;
+}
+
+trough {
+  background: @border;
+  min-height: 4px;
+  border-radius: 2px;
+}
+
+highlight {
+  background: @warning;
+  border-radius: 2px;
+}
+
+.widget-buttons-grid {
+  background: @bg;
+  border-radius: 8px;
+  margin: 5px;
+  padding: 8px;
+  border: 1px solid @border;
+}
+
+.widget-buttons-grid > button {
+  background: @bg-alt;
+  border: 1px solid @border;
+  border-radius: 4px;
+  color: @fg;
+}
+
+.widget-buttons-grid > button:checked {
+  background: @accent;
+  color: @bg;
+}
