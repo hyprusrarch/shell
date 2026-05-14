@@ -26,17 +26,17 @@ if confirm "Do you want to proceed with the installation?"; then
     sudo pacman -S --needed --noconfirm quickshell hypridle hyprlock foot cava \
     cowsay fortune-mod papirus-icon-theme fastfetch nautilus mpv \
     gpu-screen-recorder hyprshot wtype hyprland flatpak \
-    hyprpolkitagent wl-clipboard cliphist cloudflare-warp-bin btop ttf-cascadia-code-nerd noto-fonts-emoji noto-fonts
+    hyprpolkitagent wl-clipboard cliphist cloudflare-warp-bin btop ttf-cascadia-code-nerd noto-fonts-emoji noto-fonts ttf-jetbrains-mono-nerd ttf-jetbrains-mono nwg-look awww
 
     yay -S --noconfirm matugen-bin
 
     sudo pacman -Rns --noconfirm gnu-free-fonts
 
     cp -r $HOME/.config youroldconfig
-    mv $HOME/shell/.config/* $HOME/.config
-    mv $HOME/shell/.scripts $HOME
-    mv $HOME/shell/.wallpapers $HOME
-    mv $HOME/.bashrc $HOME/.bashrc.bak
+    cp -r $HOME/shell/.config/* $HOME/.config
+    cp -r $HOME/shell/.scripts $HOME
+    cp -r $HOME/shell/.wallpapers $HOME
+    cp -r $HOME/.bashrc $HOME/.bashrc.bak
     cp -r $HOME/.bashrc $HOME
     sudo cp -r $HOME/shell/assets/gojo.cow /usr/share/cowsay/cows
     awww daemon
