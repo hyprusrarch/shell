@@ -32,12 +32,12 @@ if confirm "Do you want to proceed with the installation?"; then
 
     sudo pacman -Rns --noconfirm gnu-free-fonts
 
-    cp -r $HOME/.config youroldconfig
-    cp -r $HOME/shell/.config/* $HOME/.config
-    cp -r $HOME/shell/.scripts $HOME
-    cp -r $HOME/shell/.wallpapers $HOME
-    cp -r $HOME/.bashrc $HOME/.bashrc.bak
-    cp -r $HOME/.bashrc $HOME
+    mv $HOME/.config youroldconfig
+    mv $HOME/shell/.config/ $HOME/.config
+    mv $HOME/shell/.scripts $HOME
+    mv $HOME/shell/.wallpapers $HOME
+    mv $HOME/.bashrc $HOME/.bashrc.bak
+    mv $HOME/shell/assets/.bashrc $HOME
     sudo cp -r $HOME/shell/assets/gojo.cow /usr/share/cowsay/cows
     awww daemon
     awww img $HOME/shell/assets/chick.jpg
