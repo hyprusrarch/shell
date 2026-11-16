@@ -1,1 +1,40 @@
+singleton ClipboardTheme ClipboardTheme.qml
 singleton Theme Theme.qml
+singleton M3 M3.qml
+singleton Ui Ui.qml
+singleton Notifs Notifs.qml
+singleton Audio Audio.qml
+singleton SystemStatus SystemStatus.qml
+singleton Wifi Wifi.qml
+singleton Bt Bt.qml
+singleton Brightness Brightness.qml
+RoundCorner components/RoundCorner.qml
+Icon Icon.qml
+M3Button M3Button.qml
+M3IconButton M3IconButton.qml
+M3Overlay M3Overlay.qml
+M3Slider M3Slider.qml
+M3Switch M3Switch.qml
+M3Text M3Text.qml
+NotifCard NotifCard.qml
+Panel Panel.qml
+QuickPage QuickPage.qml
+SpringValue SpringValue.qml
+Surface Surface.qml
+Tile Tile.qml
+Toasts Toasts.qml
+WifiPage WifiPage.qml
+WifiRow WifiRow.qml
+SemiCircle SemiCircle.qml
+ClipboardTextEntry components/ClipboardTextEntry.qml
+ClipboardImageTile components/ClipboardImageTile.qml
+ClipboardFavoriteEntry components/ClipboardFavoriteEntry.qml
+ClipboardTabBar components/ClipboardTabBar.qml
+
+ClipboardHeader components/ClipboardHeader.qml
+ClipboardSemiCircleHandle components/ClipboardSemiCircleHandle.qml
+CornerMask CornerMask.qml
+ClipboardRemoval components/ClipboardRemoval.qml
+ClipboardPage ClipboardPage.qml
+singleton ClipboardSources ClipboardSources.qml
+LauncherPage launcher/LauncherPage.qml

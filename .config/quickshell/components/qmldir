@@ -1,0 +1,4 @@
+ClipboardIconButton ClipboardIconButton.qml
+ClipboardSemiCircleHandle ClipboardSemiCircleHandle.qml
+ClipboardRemoval ClipboardRemoval.qml
+ClipboardSource ClipboardSource.qml

@@ -7,6 +7,10 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: dash
+
+    function notifyClosed() {
+        Quickshell.execDetached(["sh", "-c", "runtime=\"${XDG_RUNTIME_DIR:-/tmp/qs-runtime-$(id -u)}\"; printf \"closed modules\\n\" >> \"$runtime/quickshell/control\""]);
+    }
     anchors { top: true; bottom: true; left: true; right: true }
     focusable: true
     color: "transparent"
@@ -14,7 +18,7 @@ PanelWindow {
     Process {
         id: closeWatcher
         running: true
-        command: ["tail", "-F", "/tmp/qs_modules_cmd"]
+        command: ["sh", "-c", "runtime=\"${XDG_RUNTIME_DIR:-/tmp/qs-runtime-$(id -u)}\"; exec tail -n 0 -F \"$runtime/quickshell/modules.cmd\""]
         stdout: SplitParser {
             onRead: function(data) {
                 if (data.trim() === "CLOSE" && !outroAnim.running) {
@@ -38,14 +42,13 @@ PanelWindow {
         easing.type: Easing.OutQuart
         onFinished: {
             dash.animatingTab = -1;
-            gc();
-        }
+            }
     }
 
     function switchTab(newTab) {
         if (activeTab === newTab) return;
         if (!swipeHandler.active) {
-            dash.swipeOffset = newTab > activeTab ? (mainBox.width + 40) : -(mainBox.width + 40);
+            dash.swipeOffset = newTab > activeTab ? (mainBox.width + 48) : -(mainBox.width + 48);
         }
 
         animatingTab = activeTab;
@@ -218,14 +221,7 @@ PanelWindow {
         dash.temp          = "";
         dash.weatherIcon   = "";
         dash.notesLoaded   = false;
-        gc();
-        Qt.callLater(function() {
-            gc();
-            Qt.callLater(function() {
-                gc();
-                Qt.callLater(Qt.quit);
-            });
-        });
+        dash.notifyClosed();
     }
 
     MouseArea {
@@ -247,9 +243,9 @@ PanelWindow {
         Item {
             id: layerWrapper
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 630;
-            height: 475
-            y: -height - 20
+            width: 756;
+            height: 570
+            y: -height - 24
 
             Timer {
                 interval: 20;
@@ -274,7 +270,7 @@ PanelWindow {
                 NumberAnimation {
                     target: layerWrapper;
                     property: "y";
-                    to: -layerWrapper.height - 160;
+                    to: -layerWrapper.height - 192;
                     duration: 300;
                     easing.type: Easing.InQuart
                 }
@@ -284,11 +280,11 @@ PanelWindow {
             Rectangle {
                 id: mainBox
                 anchors.centerIn: parent
-                width: 600;
-                height: 475
+                width: 720;
+                height: 570
 
                 color: Theme.bgMain;
-                radius: 10;
+                radius: 12;
                 border.color: Theme.border;
                 border.width: 0
 
@@ -303,7 +299,7 @@ PanelWindow {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: 15
+                    height: 18
                     color: Theme.bgMain
                 }
 
@@ -313,24 +309,24 @@ PanelWindow {
                         top: parent.top;
                         left: parent.left;
                         right: parent.right;
-                        margins: 16
+                        margins: 19
                     }
-                    height: 36;
-                    spacing: 12;
+                    height: 43;
+                    spacing: 14;
                     z: 5
 
                     Repeater {
                         model: ["󰕮  DASHBOARD", "󰸉  WALLPAPERS"]
                         delegate: Rectangle {
-                            width: (navBar.width - 12) / 2;
-                            height: 36
+                            width: (navBar.width - 14) / 2;
+                            height: 43
                             color: dash.activeTab === index ? Theme.border : "transparent";
-                            radius: 8
+                            radius: 10
 
                             Text {
                                 anchors.centerIn: parent;
                                 text: modelData
-                                font.pixelSize: 10;
+                                font.pixelSize: 12;
                                 font.bold: true;
                                 textFormat: Text.PlainText
                                 color: dash.activeTab === index ? (index === 0 ? Theme.accent : Theme.accentAlt) : Theme.textMuted
@@ -355,7 +351,7 @@ PanelWindow {
                         left: parent.left;
                         right: parent.right;
                         bottom: parent.bottom;
-                        margins: 16
+                        margins: 19
                     }
 
                     DragHandler {
@@ -376,7 +372,7 @@ PanelWindow {
                         onActiveChanged: {
                             if (!active) {
                                 let dx = lastDx;
-                                let threshold = (mainBox.width + 40) / 2;
+                                let threshold = (mainBox.width + 48) / 2;
                                 let targetIndex = dash.activeTab;
 
                                 if (dx < -threshold && dash.activeTab < 1) {
@@ -388,9 +384,9 @@ PanelWindow {
 
                                 if (targetIndex !== dash.activeTab) {
                                     if (targetIndex > dash.activeTab) {
-                                        dash.swipeOffset += (mainBox.width + 40);
+                                        dash.swipeOffset += (mainBox.width + 48);
                                     } else {
-                                        dash.swipeOffset -= (mainBox.width + 40);
+                                        dash.swipeOffset -= (mainBox.width + 48);
                                     }
 
                                     dash.animatingTab = dash.activeTab;
@@ -488,28 +484,28 @@ PanelWindow {
                             Row {
                                 id: midRow;
                                 width: parent.width;
-                                height: 310;
-                                spacing: 16
+                                height: 372;
+                                spacing: 19
 
                                 Column {
-                                    width: 216;
+                                    width: 259;
                                     height: parent.height;
-                                    spacing: 14
+                                    spacing: 17
 
                                     Rectangle {
                                         width: parent.width;
-                                        height: 256;
+                                        height: 307;
                                         color: Theme.border;
-                                        radius: 8
+                                        radius: 10
 
                                         ColumnLayout {
                                             anchors.fill: parent;
-                                            anchors.margins: 8
+                                            anchors.margins: 10
 
                                             Text {
                                                 text: Qt.formatDate(dash.today, "MMMM yyyy").toUpperCase()
                                                 color: Theme.accent;
-                                                font.pixelSize: 10;
+                                                font.pixelSize: 12;
                                                 font.bold: true
                                                 Layout.alignment: Qt.AlignHCenter;
                                                 textFormat: Text.PlainText
@@ -526,7 +522,7 @@ PanelWindow {
                                                         Layout.fillWidth: true
                                                         horizontalAlignment: Text.AlignHCenter
                                                         color: Theme.textMuted;
-                                                        font.pixelSize: 8;
+                                                        font.pixelSize: 10;
                                                         textFormat: Text.PlainText
                                                     }
                                                 }
@@ -534,9 +530,9 @@ PanelWindow {
                                                 Repeater {
                                                     model: 42
                                                     delegate: Rectangle {
-                                                        Layout.preferredWidth: 22;
-                                                        Layout.preferredHeight: 22;
-                                                        radius: 4
+                                                        Layout.preferredWidth: 26;
+                                                        Layout.preferredHeight: 26;
+                                                        radius: 5
 
                                                         readonly property int  dNum:  index - dash.firstDayCache + 1
                                                         readonly property bool valid: dNum > 0 && dNum <= dash.daysInMonthCache
@@ -548,7 +544,7 @@ PanelWindow {
                                                             anchors.centerIn: parent;
                                                             text: parent.dNum
                                                             color: parent.dNum === dash.selectedDay ? Theme.bgMain : parent.dNum === dash.today.getDate() ? Theme.accent : Theme.textMain
-                                                            font.pixelSize: 9;
+                                                            font.pixelSize: 11;
                                                             textFormat: Text.PlainText
                                                         }
                                                     }
@@ -559,19 +555,19 @@ PanelWindow {
 
                                     Rectangle {
                                         width: parent.width;
-                                        height: 40;
+                                        height: 48;
                                         color: Theme.border;
-                                        radius: 8
+                                        radius: 10
 
                                         Row {
                                             anchors.centerIn: parent;
-                                            spacing: 20
+                                            spacing: 24
 
                                             Repeater {
                                                 model: dash.powerActions
                                                 delegate: Text {
                                                     text: modelData.i;
-                                                    font.pixelSize: 16;
+                                                    font.pixelSize: 19;
                                                     font.family: "Symbols Nerd Font"
                                                     color: pwMa.containsMouse ? Theme[modelData.clr] : Theme.textMuted
 
@@ -597,23 +593,23 @@ PanelWindow {
                                 }
 
                                 Column {
-                                    width: parent.width - 216 - 16;
+                                    width: parent.width - 259 - 19;
                                     height: parent.height;
-                                    spacing: 14
+                                    spacing: 17
 
                                     Rectangle {
                                         width: parent.width;
-                                        height: 76;
+                                        height: 91;
                                         color: Theme.border;
-                                        radius: 8
+                                        radius: 10
 
                                         RowLayout {
                                             anchors.centerIn: parent;
-                                            spacing: 12
+                                            spacing: 14
 
                                             Text {
                                                 text: dash.weatherIcon;
-                                                font.pixelSize: 30;
+                                                font.pixelSize: 36;
                                                 color: Theme.info;
                                                 font.family: "Symbols Nerd Font"
                                             }
@@ -622,14 +618,14 @@ PanelWindow {
                                                 Text {
                                                     text: dash.temp;
                                                     color: Theme.textMain;
-                                                    font.pixelSize: 20;
+                                                    font.pixelSize: 24;
                                                     font.bold: true;
                                                     textFormat: Text.PlainText
                                                 }
                                                 Text {
                                                     text: dash.locationName;
                                                     color: Theme.textMuted;
-                                                    font.pixelSize: 7;
+                                                    font.pixelSize: 8;
                                                     textFormat: Text.PlainText
                                                 }
                                             }
@@ -638,14 +634,14 @@ PanelWindow {
 
                                     Rectangle {
                                         width: parent.width;
-                                        height: parent.height - 76 - 14
+                                        height: parent.height - 91 - 17
                                         color: Theme.border;
-                                        radius: 8
+                                        radius: 10
 
                                         ColumnLayout {
                                             anchors.fill: parent;
-                                            anchors.margins: 10;
-                                            spacing: 4
+                                            anchors.margins: 12;
+                                            spacing: 5
 
                                             Item {
                                                 Layout.fillWidth: true;
@@ -669,7 +665,7 @@ PanelWindow {
                                                         text: dash.notesData
                                                         textFormat: TextEdit.PlainText
                                                         color: Theme.textMain
-                                                        font.pixelSize: 10
+                                                        font.pixelSize: 12
                                                         font.family: "CaskaydiaCove Nerd Font"
                                                         wrapMode: TextEdit.Wrap
                                                         selectByMouse: true
@@ -694,13 +690,13 @@ PanelWindow {
                                                         top: parent.top;
                                                         bottom: parent.bottom
                                                     }
-                                                    width: 3;
+                                                    width: 4;
                                                     color: "transparent"
                                                     visible: noteFlick.visibleArea.heightRatio < 1.0
 
                                                     Rectangle {
                                                         y:      noteFlick.visibleArea.yPosition  * noteTrack.height
-                                                        height: Math.max(16, noteFlick.visibleArea.heightRatio * noteTrack.height)
+                                                        height: Math.max(19, noteFlick.visibleArea.heightRatio * noteTrack.height)
                                                         width:  parent.width;
                                                         radius: 2;
                                                         color: Theme.textMuted
@@ -725,23 +721,23 @@ PanelWindow {
 
                             Rectangle {
                                 anchors.top: midRow.bottom;
-                                anchors.topMargin: 14
+                                anchors.topMargin: 17
                                 anchors.bottom: parent.bottom;
                                 width: parent.width
                                 color: Theme.border;
-                                radius: 8
+                                radius: 10
 
                                 RowLayout {
                                     anchors.fill: parent;
-                                    anchors.margins: 14
-                                    spacing: modRoot.diskData.length > 1 ? 20 : 0
+                                    anchors.margins: 17
+                                    spacing: modRoot.diskData.length > 1 ? 24 : 0
 
                                     Repeater {
                                         model: modRoot.diskData
                                         delegate: ColumnLayout {
                                             Layout.alignment: Qt.AlignVCenter
-                                            Layout.preferredWidth: modRoot.diskData.length > 1 ? (parent.width - 20) / 2 : parent.width
-                                            spacing: 5
+                                            Layout.preferredWidth: modRoot.diskData.length > 1 ? (parent.width - 24) / 2 : parent.width
+                                            spacing: 6
 
                                             readonly property int diskPct: modelData.pct
 
@@ -750,7 +746,7 @@ PanelWindow {
                                                 Text {
                                                     text: modelData.name;
                                                     color: Theme.accent;
-                                                    font.pixelSize: 9;
+                                                    font.pixelSize: 11;
                                                     font.bold: true;
                                                     textFormat: Text.PlainText
                                                 }
@@ -758,22 +754,22 @@ PanelWindow {
                                                 Text {
                                                     text: modelData.size + "  ·  " + diskPct + "% used";
                                                     color: Theme.textMuted;
-                                                    font.pixelSize: 7;
+                                                    font.pixelSize: 8;
                                                     textFormat: Text.PlainText
                                                 }
                                             }
 
                                             Rectangle {
                                                 Layout.fillWidth: true;
-                                                Layout.preferredHeight: 6;
+                                                Layout.preferredHeight: 7;
                                                 color: Theme.bgMain;
-                                                radius: 3
+                                                radius: 4
 
                                                 Rectangle {
                                                     property real displayPct: 0
                                                     width: parent.width * (displayPct / 100)
                                                     height: parent.height;
-                                                    radius: 3
+                                                    radius: 4
                                                     color: diskPct > 90 ? Theme.error : diskPct > 70 ? Theme.warning : Theme.info
 
                                                     Behavior on displayPct {
@@ -790,7 +786,7 @@ PanelWindow {
                                             Text {
                                                 text: modelData.avail + " free";
                                                 color: Theme.textMuted;
-                                                font.pixelSize: 7;
+                                                font.pixelSize: 8;
                                                 Layout.alignment: Qt.AlignRight;
                                                 textFormat: Text.PlainText
                                             }
@@ -841,7 +837,7 @@ PanelWindow {
                                 command: ["sh", "-c",
                                 "mkdir -p \"$HOME/.wallpapers\" && " +
                                 "find \"$HOME/.wallpapers\" -maxdepth 1 -type f " +
-                                "\\( -iname \"*.jpg\" -o -iname \"*.png\" -o -iname \"*.jpeg\" -o -iname \"*.gif\" \\) " +
+                                "\\( -iname \"*.jpg\" -o -iname \"*.png\" -o -iname \"*.jpeg\" -o -iname \"*.jxl\" \\) " +
                                 "-printf \"%f|file://%p\\n\" | sort"]
                                 property string buffer: ""
                                 stdout: SplitParser {
@@ -864,24 +860,24 @@ PanelWindow {
 
                             ColumnLayout {
                                 anchors.fill: parent;
-                                spacing: 6
+                                spacing: 7
 
                                 Rectangle {
                                     Layout.fillWidth: true;
-                                    Layout.preferredHeight: 34
+                                    Layout.preferredHeight: 41
                                     color: Theme.border;
-                                    radius: 8
+                                    radius: 10
 
                                     RowLayout {
                                         anchors { fill: parent;
-                                            leftMargin: 10; rightMargin: 36 }
-                                            spacing: 6
+                                            leftMargin: 12; rightMargin: 43 }
+                                            spacing: 7
 
                                             Text {
                                                 text: "󰍉";
                                                 color: Theme.textMuted
                                                 font.family: "Symbols Nerd Font";
-                                                font.pixelSize: 14
+                                                font.pixelSize: 17
                                                 textFormat: Text.PlainText
                                                 Layout.alignment: Qt.AlignVCenter
                                             }
@@ -898,7 +894,7 @@ PanelWindow {
                                                         verticalCenter: parent.verticalCenter
                                                     }
                                                     color: Theme.textMain;
-                                                    font.pixelSize: 10
+                                                    font.pixelSize: 12
                                                     font.family: "CaskaydiaCove Nerd Font"
                                                     selectionColor: Theme.accent;
                                                     selectedTextColor: Theme.bgMain
@@ -911,7 +907,7 @@ PanelWindow {
                                                         anchors.fill: parent
                                                         text: "Search wallpapers..."
                                                         color: Theme.textMuted;
-                                                        font.pixelSize: 10
+                                                        font.pixelSize: 12
                                                         font.family: "CaskaydiaCove Nerd Font"
                                                         textFormat: Text.PlainText
                                                         visible: wallSearch.text.length === 0 && !wallSearch.activeFocus
@@ -921,11 +917,11 @@ PanelWindow {
                                     }
 
                                     Rectangle {
-                                        anchors { right: parent.right; rightMargin: 8;
+                                        anchors { right: parent.right; rightMargin: 10;
                                             verticalCenter: parent.verticalCenter }
-                                            width: 20;
-                                            height: 20;
-                                            radius: 4
+                                            width: 24;
+                                            height: 24;
+                                            radius: 5
                                             visible: wallSearch.text.length > 0
                                             color: clrBtn.containsMouse ? Theme.bgMain : "transparent"
 
@@ -937,7 +933,7 @@ PanelWindow {
                                                 anchors.centerIn: parent;
                                                 text: "✕";
                                                 color: Theme.textMuted;
-                                                font.pixelSize: 9;
+                                                font.pixelSize: 11;
                                                 textFormat: Text.PlainText
                                             }
 
@@ -956,7 +952,7 @@ PanelWindow {
                                     Rectangle {
                                         anchors.bottom: parent.bottom;
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        width: wallSearch.activeFocus ? parent.width - 16 : 0;
+                                        width: wallSearch.activeFocus ? parent.width - 19 : 0;
                                         height: 1
                                         color: Theme.accent;
                                         radius: 1
@@ -974,7 +970,7 @@ PanelWindow {
                                     visible: wallRoot.searchText.length > 0
                                     text: wallRoot.filteredData.length + " / " + dash.wallpaperData.length + " wallpapers"
                                     color: Theme.textMuted;
-                                    font.pixelSize: 8;
+                                    font.pixelSize: 10;
                                     textFormat: Text.PlainText
                                 }
 
@@ -996,8 +992,8 @@ PanelWindow {
 
                                         model: wallRoot.filteredData
 
-                                        cellWidth:  Math.floor((parent.width - 6) / 3)
-                                        cellHeight: 152
+                                        cellWidth:  Math.floor((parent.width - 7) / 3)
+                                        cellHeight: 182
 
                                         Text {
                                             anchors.centerIn: parent
@@ -1006,7 +1002,7 @@ PanelWindow {
                                             ? "No wallpapers found in ~/.wallpapers"
                                             : "No results for \"" + wallRoot.searchText + "\""
                                             color: Theme.textMuted;
-                                            font.pixelSize: 10;
+                                            font.pixelSize: 12;
                                             textFormat: Text.PlainText
                                             wrapMode: Text.WordWrap;
                                             horizontalAlignment: Text.AlignHCenter
@@ -1019,9 +1015,9 @@ PanelWindow {
 
                                             Rectangle {
                                                 anchors.fill: parent;
-                                                anchors.margins: 4
+                                                anchors.margins: 5
                                                 color: Theme.border;
-                                                radius: 8;
+                                                radius: 10;
                                                 clip: true
 
                                                 Column {
@@ -1050,12 +1046,12 @@ PanelWindow {
                                                         right: parent.right;
                                                         bottom: parent.bottom
                                                     }
-                                                    leftPadding: 7;
-                                                    rightPadding: 7;
-                                                    height: 34
+                                                    leftPadding: 8;
+                                                    rightPadding: 8;
+                                                    height: 41
                                                     text: modelData.name;
                                                     color: Theme.textMain;
-                                                    font.pixelSize: 8
+                                                    font.pixelSize: 10
                                                     verticalAlignment: Text.AlignVCenter
                                                     horizontalAlignment: Text.AlignLeft
                                                     elide: Text.ElideRight;
@@ -1085,13 +1081,13 @@ PanelWindow {
                                     Rectangle {
                                         id: wallTrack
                                         anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
-                                        width: 4;
+                                        width: 5;
                                         color: "transparent"
                                         visible: wallGrid.visibleArea.heightRatio < 1.0
 
                                         Rectangle {
                                             y:      wallGrid.visibleArea.yPosition  * wallTrack.height
-                                            height: Math.max(20, wallGrid.visibleArea.heightRatio * wallTrack.height)
+                                            height: Math.max(24, wallGrid.visibleArea.heightRatio * wallTrack.height)
                                             width:  parent.width;
                                             radius: 2
                                             color: Theme.textMuted
@@ -1114,7 +1110,7 @@ PanelWindow {
 
 
                                                 let tY = wallGrid.visibleArea.yPosition * wallTrack.height;
-                                                let tH = Math.max(20, wallGrid.visibleArea.heightRatio * wallTrack.height);
+                                                let tH = Math.max(24, wallGrid.visibleArea.heightRatio * wallTrack.height);
 
                                                 if (mouse.y < tY || mouse.y > tY + tH) {
                                                     let trackScrollable = wallTrack.height - tH;
@@ -1128,7 +1124,7 @@ PanelWindow {
                                             onPositionChanged: function(mouse) {
                                                 if (pressed) {
                                                     let dy = mouse.y - lastY;
-                                                    let tH = Math.max(20, wallGrid.visibleArea.heightRatio * wallTrack.height);
+                                                    let tH = Math.max(24, wallGrid.visibleArea.heightRatio * wallTrack.height);
                                                     let trackScrollable = wallTrack.height - tH;
 
                                                     if (trackScrollable > 0) {
@@ -1156,7 +1152,7 @@ PanelWindow {
                         active: true
                         sourceComponent: modulesComp
                         visible: x > -width && x < mainBox.width
-                        x: ((0 - dash.activeTab) * (parent.width + 40)) + dash.swipeOffset
+                        x: ((0 - dash.activeTab) * (parent.width + 48)) + dash.swipeOffset
                     }
 
                     Loader {
@@ -1168,7 +1164,7 @@ PanelWindow {
                         active: true
                         sourceComponent: wallComp
                         visible: x > -width && x < mainBox.width
-                        x: ((1 - dash.activeTab) * (parent.width + 40)) + dash.swipeOffset
+                        x: ((1 - dash.activeTab) * (parent.width + 48)) + dash.swipeOffset
                     }
                 }
             }
@@ -1176,35 +1172,35 @@ PanelWindow {
             Shape {
                 anchors.top: mainBox.top
                 anchors.right: mainBox.left
-                width: 15;
-                height: 15
+                width: 18;
+                height: 18
                 ShapePath {
                     fillColor: Theme.bgMain
                     strokeWidth: 0
                     startX: 0;
                     startY: 0
-                    PathLine { x: 15;
+                    PathLine { x: 18;
                         y: 0 }
-                        PathLine { x: 15;
-                            y: 15 }
+                        PathLine { x: 18;
+                            y: 18 }
                             PathArc { x: 0;
-                                y: 0; radiusX: 15; radiusY: 15; direction: PathArc.Counterclockwise }
+                                y: 0; radiusX: 18; radiusY: 18; direction: PathArc.Counterclockwise }
                 }
             }
 
             Shape {
                 anchors.top: mainBox.top
                 anchors.left: mainBox.right
-                width: 15; height: 15
+                width: 18; height: 18
                 ShapePath {
                     fillColor: Theme.bgMain
                     strokeWidth: 0
                     startX: 0;
                     startY: 0
-                    PathLine { x: 15;
+                    PathLine { x: 18;
                         y: 0 }
                         PathArc { x: 0;
-                            y: 15; radiusX: 15; radiusY: 15; direction: PathArc.Counterclockwise }
+                            y: 18; radiusX: 18; radiusY: 18; direction: PathArc.Counterclockwise }
                             PathLine { x: 0;
                                 y: 0 }
                 }

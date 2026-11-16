@@ -1,0 +1,13 @@
+LauncherController LauncherController.qml
+LauncherSearchBar LauncherSearchBar.qml
+LauncherTabBar LauncherTabBar.qml
+LauncherCalcStrip LauncherCalcStrip.qml
+LauncherPages LauncherPages.qml
+LauncherAppPane LauncherAppPane.qml
+LauncherGridItem LauncherGridItem.qml
+LauncherListItem LauncherListItem.qml
+LauncherThemePane LauncherThemePane.qml
+LauncherThemeCard LauncherThemeCard.qml
+LauncherGlyph LauncherGlyph.qml
+LauncherHideBadge LauncherHideBadge.qml
+LauncherPage LauncherPage.qml

@@ -8,6 +8,10 @@ import Quickshell.Services.Mpris
 PanelWindow {
     id: root
 
+    function notifyClosed() {
+        Quickshell.execDetached(["sh", "-c", "runtime=\"${XDG_RUNTIME_DIR:-/tmp/qs-runtime-$(id -u)}\"; printf \"closed media\\n\" >> \"$runtime/quickshell/control\""]);
+    }
+
     anchors {
         top: true
         bottom: true
@@ -38,13 +42,7 @@ PanelWindow {
     Process {
         id: closeWatcher
         running: true
-        command: [
-            "tail",
-            "-n",
-            "0",
-            "-F",
-            "/tmp/qs_media_cmd"
-        ]
+        command: ["sh", "-c", "runtime=\"${XDG_RUNTIME_DIR:-/tmp/qs-runtime-$(id -u)}\"; exec tail -n 0 -F \"$runtime/quickshell/media.cmd\""]
         stdout: SplitParser {
             onRead: function(data) {
                 if (data.trim() === "CLOSE" && !outroAnim.running) {
@@ -75,10 +73,10 @@ PanelWindow {
 
     Item {
         id: swoopContainer
-        width: 340
-        height: mainLayout.implicitHeight + 30
-        x: root.width - width - 20
-        y: -height - 15
+        width: 408
+        height: mainLayout.implicitHeight + 36
+        x: root.width - width - 24
+        y: -height - 18
 
         Component.onCompleted: introAnim.start()
 
@@ -92,8 +90,7 @@ PanelWindow {
                 easing.type: Easing.OutQuart
             }
             onFinished: {
-                gc();
-            }
+                }
         }
 
         ParallelAnimation {
@@ -101,14 +98,11 @@ PanelWindow {
             NumberAnimation {
                 target: swoopContainer
                 property: "y"
-                to: -swoopContainer.height - 160
+                to: -swoopContainer.height - 192
                 duration: 250
                 easing.type: Easing.InQuart
             }
-            onFinished: {
-                gc();
-                Qt.callLater(Qt.quit);
-            }
+            onFinished: root.notifyClosed()
         }
 
         MouseArea {
@@ -122,11 +116,11 @@ PanelWindow {
             id: mainBox
             anchors.fill: parent
             color: root.bgMain
-            radius: 12
+            radius: 14
 
             Rectangle {
                 width: parent.width
-                height: 12
+                height: 14
                 anchors.top: parent.top
                 color: root.bgMain
             }
@@ -136,17 +130,17 @@ PanelWindow {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.margins: 16
-                spacing: 12
+                anchors.margins: 19
+                spacing: 14
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 8
+                    spacing: 10
 
                     Text {
                         text: "󰝚"
                         font.family: "Symbols Nerd Font"
-                        font.pixelSize: 14
+                        font.pixelSize: 17
                         color: root.accent
                         renderType: Text.NativeRendering
                         textFormat: Text.PlainText
@@ -156,7 +150,7 @@ PanelWindow {
                     Text {
                         text: "Media Control"
                         font.family: "Noto Sans"
-                        font.pixelSize: 11
+                        font.pixelSize: 13
                         font.bold: true
                         color: root.textMain
                         Layout.fillWidth: true
@@ -167,12 +161,12 @@ PanelWindow {
 
                     RowLayout {
                         visible: root.playerCount > 1
-                        spacing: 12
+                        spacing: 14
 
                         Text {
                             text: "󰅁"
                             font.family: "Symbols Nerd Font"
-                            font.pixelSize: 16
+                            font.pixelSize: 19
                             color: prevAppArea.containsMouse ? root.accent : root.textMuted
                             renderType: Text.NativeRendering
                             textFormat: Text.PlainText
@@ -181,7 +175,7 @@ PanelWindow {
                             MouseArea {
                                 id: prevAppArea
                                 anchors.fill: parent
-                                anchors.margins: -5
+                                anchors.margins: -6
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
@@ -193,7 +187,7 @@ PanelWindow {
                         Text {
                             text: "󰅂"
                             font.family: "Symbols Nerd Font"
-                            font.pixelSize: 16
+                            font.pixelSize: 19
                             color: nextAppArea.containsMouse ? root.accent : root.textMuted
                             renderType: Text.NativeRendering
                             textFormat: Text.PlainText
@@ -202,7 +196,7 @@ PanelWindow {
                             MouseArea {
                                 id: nextAppArea
                                 anchors.fill: parent
-                                anchors.margins: -5
+                                anchors.margins: -6
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
@@ -225,7 +219,7 @@ PanelWindow {
                     Layout.alignment: Qt.AlignCenter
                     text: "No media players running"
                     font.family: "Noto Sans"
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     color: root.textMuted
                     horizontalAlignment: Text.AlignHCenter
                     renderType: Text.NativeRendering
@@ -251,34 +245,34 @@ PanelWindow {
                                 RowLayout {
                                     property QtObject player: delegateLoader.playerModelData
                                     Layout.fillWidth: true
-                                    spacing: 16
+                                    spacing: 19
 
                                     ColumnLayout {
                                         Layout.fillWidth: true
-                                        spacing: 16
+                                        spacing: 19
 
                                         RowLayout {
                                             Layout.fillWidth: true
-                                            spacing: 16
+                                            spacing: 19
 
                                             Item {
-                                                width: 76
-                                                height: 76
+                                                width: 91
+                                                height: 91
                                                 Layout.alignment: Qt.AlignVCenter
 
                                                 Rectangle {
                                                     anchors.centerIn: parent
-                                                    width: 60
-                                                    height: 60
-                                                    radius: 30
+                                                    width: 72
+                                                    height: 72
+                                                    radius: 36
                                                     color: "#111111"
                                                 }
 
                                                 Item {
                                                     id: spinningPart
                                                     anchors.centerIn: parent
-                                                    width: 60
-                                                    height: 60
+                                                    width: 72
+                                                    height: 72
 
                                                     RotationAnimation {
                                                         target: spinningPart
@@ -295,7 +289,7 @@ PanelWindow {
                                                         anchors.centerIn: parent
                                                         text: "󰎆"
                                                         font.family: "Symbols Nerd Font"
-                                                        font.pixelSize: 24
+                                                        font.pixelSize: 29
                                                         color: root.textMuted
                                                         visible: !albumArt.source || albumArt.source.toString() === ""
                                                         renderType: Text.NativeRendering
@@ -314,7 +308,7 @@ PanelWindow {
                                                         })() : ""
                                                         fillMode: Image.PreserveAspectCrop
                                                         opacity: 0.9
-                                                        sourceSize: Qt.size(64, 64)
+                                                        sourceSize: Qt.size(77, 77)
                                                         asynchronous: true
                                                         mipmap: false
                                                         cache: false
@@ -323,19 +317,19 @@ PanelWindow {
 
                                                 Rectangle {
                                                     anchors.centerIn: parent
-                                                    width: 86
-                                                    height: 86
-                                                    radius: 43
+                                                    width: 103
+                                                    height: 103
+                                                    radius: 52
                                                     color: "transparent"
                                                     border.color: root.bgMain
-                                                    border.width: 13
+                                                    border.width: 16
                                                 }
 
                                                 Rectangle {
                                                     anchors.centerIn: parent
-                                                    width: 68
-                                                    height: 68
-                                                    radius: 34
+                                                    width: 82
+                                                    height: 82
+                                                    radius: 41
                                                     color: "transparent"
                                                     border.color: root.accent
                                                     border.width: 1
@@ -344,9 +338,9 @@ PanelWindow {
 
                                                 Rectangle {
                                                     anchors.centerIn: parent
-                                                    width: 76
-                                                    height: 76
-                                                    radius: 38
+                                                    width: 91
+                                                    height: 91
+                                                    radius: 46
                                                     color: "transparent"
                                                     border.color: root.border
                                                     border.width: 1
@@ -356,7 +350,7 @@ PanelWindow {
                                             ColumnLayout {
                                                 Layout.fillWidth: true
                                                 Layout.alignment: Qt.AlignVCenter
-                                                spacing: 4
+                                                spacing: 5
 
                                                 Text {
                                                     Layout.fillWidth: true
@@ -367,7 +361,7 @@ PanelWindow {
                                                         return "Unknown Title";
                                                     })() : ""
                                                     font.family: "Noto Sans"
-                                                    font.pixelSize: 14
+                                                    font.pixelSize: 17
                                                     font.bold: true
                                                     color: root.textMain
                                                     elide: Text.ElideRight
@@ -386,7 +380,7 @@ PanelWindow {
                                                         return "Unknown Artist";
                                                     })() : ""
                                                     font.family: "Noto Sans"
-                                                    font.pixelSize: 11
+                                                    font.pixelSize: 13
                                                     color: root.textMuted
                                                     elide: Text.ElideRight
                                                     wrapMode: Text.NoWrap
@@ -399,13 +393,13 @@ PanelWindow {
                                         RowLayout {
                                             Layout.fillWidth: true
                                             Layout.alignment: Qt.AlignCenter
-                                            spacing: 24
+                                            spacing: 29
 
                                             Text {
                                                 property bool canSkip: player && player.canGoPrevious
                                                 text: "󰒮"
                                                 font.family: "Symbols Nerd Font"
-                                                font.pixelSize: 20
+                                                font.pixelSize: 24
                                                 color: canSkip ? (prevArea.containsMouse ? root.accent : root.textMain) : root.textMuted
                                                 opacity: canSkip ? 1.0 : 0.4
                                                 renderType: Text.NativeRendering
@@ -415,7 +409,7 @@ PanelWindow {
                                                 MouseArea {
                                                     id: prevArea
                                                     anchors.fill: parent
-                                                    anchors.margins: -10
+                                                    anchors.margins: -12
                                                     hoverEnabled: parent.canSkip
                                                     cursorShape: parent.canSkip ? Qt.PointingHandCursor : Qt.ArrowCursor
                                                     onClicked: {
@@ -427,7 +421,7 @@ PanelWindow {
                                             Text {
                                                 text: (player && player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
                                                 font.family: "Symbols Nerd Font"
-                                                font.pixelSize: 28
+                                                font.pixelSize: 34
                                                 color: playArea.containsMouse ? root.accent : root.textMain
                                                 renderType: Text.NativeRendering
                                                 textFormat: Text.PlainText
@@ -436,7 +430,7 @@ PanelWindow {
                                                 MouseArea {
                                                     id: playArea
                                                     anchors.fill: parent
-                                                    anchors.margins: -10
+                                                    anchors.margins: -12
                                                     hoverEnabled: true
                                                     cursorShape: Qt.PointingHandCursor
                                                     onClicked: {
@@ -449,7 +443,7 @@ PanelWindow {
                                                 property bool canSkip: player && player.canGoNext
                                                 text: "󰒭"
                                                 font.family: "Symbols Nerd Font"
-                                                font.pixelSize: 20
+                                                font.pixelSize: 24
                                                 color: canSkip ? (nextArea.containsMouse ? root.accent : root.textMain) : root.textMuted
                                                 opacity: canSkip ? 1.0 : 0.4
                                                 renderType: Text.NativeRendering
@@ -459,7 +453,7 @@ PanelWindow {
                                                 MouseArea {
                                                     id: nextArea
                                                     anchors.fill: parent
-                                                    anchors.margins: -10
+                                                    anchors.margins: -12
                                                     hoverEnabled: parent.canSkip
                                                     cursorShape: parent.canSkip ? Qt.PointingHandCursor : Qt.ArrowCursor
                                                     onClicked: {
@@ -473,8 +467,8 @@ PanelWindow {
                                     ColumnLayout {
                                         id: rightCol
                                         Layout.fillHeight: true
-                                        Layout.preferredWidth: 20
-                                        spacing: 8
+                                        Layout.preferredWidth: 24
+                                        spacing: 10
 
                                         property string sinkId: ""
                                         property real currentVol: player ? player.volume : 0.5
@@ -536,7 +530,7 @@ PanelWindow {
 
                                             Rectangle {
                                                 anchors.centerIn: parent
-                                                width: 4
+                                                width: 5
                                                 height: parent.height
                                                 radius: 2
                                                 color: root.bgDark
@@ -584,7 +578,7 @@ PanelWindow {
                                             Layout.alignment: Qt.AlignHCenter
                                             text: rightCol.currentVol === 0 ? "󰝟" : (rightCol.currentVol < 0.5 ? "󰖀" : "󰕾")
                                             font.family: "Symbols Nerd Font"
-                                            font.pixelSize: 16
+                                            font.pixelSize: 19
                                             color: muteArea.containsMouse ? root.accent : root.textMuted
                                             renderType: Text.NativeRendering
                                             textFormat: Text.PlainText
@@ -593,7 +587,7 @@ PanelWindow {
                                             MouseArea {
                                                 id: muteArea
                                                 anchors.fill: parent
-                                                anchors.margins: -5
+                                                anchors.margins: -6
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
@@ -618,38 +612,38 @@ PanelWindow {
             Item {
                 anchors.top: mainBox.top
                 anchors.right: mainBox.left
-                width: 15
-                height: 15
+                width: 18
+                height: 18
                 clip: true
 
                 Rectangle {
-                    width: 60
-                    height: 60
-                    radius: 30
+                    width: 72
+                    height: 72
+                    radius: 36
                     color: "transparent"
                     border.color: Theme.bgMain
-                    border.width: 15
-                    x: -30
-                    y: -15
+                    border.width: 18
+                    x: -36
+                    y: -18
                 }
             }
 
             Item {
                 anchors.top: mainBox.top
                 anchors.left: mainBox.right
-                width: 15
-                height: 15
+                width: 18
+                height: 18
                 clip: true
 
                 Rectangle {
-                    width: 60
-                    height: 60
-                    radius: 30
+                    width: 72
+                    height: 72
+                    radius: 36
                     color: "transparent"
                     border.color: Theme.bgMain
-                    border.width: 15
-                    x: -15
-                    y: -15
+                    border.width: 18
+                    x: -18
+                    y: -18
                 }
             }
         }

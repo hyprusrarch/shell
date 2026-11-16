@@ -9,6 +9,10 @@ import "themes.js" as ThemeDb
 PanelWindow {
     id: root
 
+    function notifyClosed() {
+        Quickshell.execDetached(["sh", "-c", "runtime=\"${XDG_RUNTIME_DIR:-/tmp/qs-runtime-$(id -u)}\"; printf \"closed wifi\\n\" >> \"$runtime/quickshell/control\""]);
+    }
+
     anchors {
         top: true
         bottom: true
@@ -31,7 +35,7 @@ PanelWindow {
     Process {
         id: closeWatcher
         running: true
-        command: ["tail", "-n", "0", "-F", "/tmp/qs_wifi_cmd"]
+        command: ["sh", "-c", "runtime=\"${XDG_RUNTIME_DIR:-/tmp/qs-runtime-$(id -u)}\"; exec tail -n 0 -F \"$runtime/quickshell/wifi.cmd\""]
         stdout: SplitParser {
             onRead: (data) => {
                 if (data.trim() === "CLOSE" && !outroAnim.running) {
@@ -48,7 +52,7 @@ PanelWindow {
 
     Timer {
         id: rootInitTimer
-        interval: 400
+        interval: 150
         running: true
         repeat: false
         onTriggered: {
@@ -157,8 +161,7 @@ PanelWindow {
 
     function closeAndPurge() {
         wifiModel.clear();
-        gc(); // Added: Instantly frees memory from the Javascript V4 engine
-        Qt.callLater(Qt.quit);
+        root.notifyClosed();
     }
 
     MouseArea {
@@ -191,7 +194,7 @@ PanelWindow {
             NumberAnimation {
                 target: swoopContainer;
                 property: "y";
-                to: 0; duration: 350; easing.type: Easing.OutQuart
+                to: 10; duration: 350; easing.type: Easing.OutQuart
             }
             onFinished: {
                 listView.forceActiveFocus();
@@ -220,15 +223,7 @@ PanelWindow {
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             color: Theme.bgMain
-            radius: 12
-
-            Rectangle {
-                width: parent.width
-                height: 12
-                anchors.top: parent.top
-                anchors.horizontalCenter: parent.horizontalCenter
-                color: Theme.bgMain
-            }
+            radius: 16
 
             ListModel { id: wifiModel }
 
@@ -251,16 +246,16 @@ PanelWindow {
 
                     Text {
                         text: "Wi-Fi Networks"
-                        font.family: "Noto Sans"
-                        font.pixelSize: 11
-                        font.bold: true
+                        font.family: "Google Sans"
+                        font.pixelSize: 13
+                        font.weight: Font.Medium
                         color: Theme.textMain
                         Layout.fillWidth: true
                         renderType: Text.NativeRendering
                     }
 
                     Rectangle {
-                        width: 22; height: 22; radius: 6
+                        width: 24; height: 24; radius: 8
                         color: refreshArea.containsMouse ? Theme.bgDark : "transparent"
                         Text {
                             anchors.centerIn: parent
@@ -327,20 +322,14 @@ PanelWindow {
                         // Dynamically adjust height
                         height: isExpanded ? 30 + expandedLoader.implicitHeight + 12 : 30
 
-                        radius: 8
+                        radius: 10
                         color: netInUse ? Theme.bgDark : (itemArea.containsMouse || isCurrent ? Theme.bgDark : "transparent")
-                        border.color: netInUse ? Theme.accent : (itemArea.containsMouse || isCurrent ? Theme.border : "transparent")
-                        border.width: 1
 
                         Behavior on height {
                             enabled: !root.isUpdating
                             NumberAnimation { duration: 200; easing.type: Easing.OutQuart }
                         }
                         Behavior on color {
-                            enabled: !root.isUpdating
-                            ColorAnimation { duration: 150 }
-                        }
-                        Behavior on border.color {
                             enabled: !root.isUpdating
                             ColorAnimation { duration: 150 }
                         }
@@ -365,9 +354,9 @@ PanelWindow {
 
                             Text {
                                 text: delegateRect.netSsid
-                                font.family: "Noto Sans"
-                                font.pixelSize: 10
-                                font.bold: delegateRect.netInUse
+                                font.family: "Google Sans"
+                                font.pixelSize: 11
+                                font.weight: delegateRect.netInUse ? Font.Medium : Font.Normal
                                 color: delegateRect.netInUse ? Theme.accent : Theme.textMain
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
@@ -428,12 +417,11 @@ PanelWindow {
                                     spacing: 6
 
                                     Rectangle {
-                                        Layout.fillWidth: true; height: 24; radius: 4
+                                        Layout.fillWidth: true; height: 26; radius: 8
                                         color: forgetArea.containsMouse ? Theme.error : Theme.bgMain
-                                        border.color: Theme.error; border.width: 1
-                                        Text {
+                                                                                Text {
                                             anchors.centerIn: parent; text: "Forget"
-                                            font.family: "Noto Sans"; font.pixelSize: 10; color: Theme.textMain
+                                            font.family: "Google Sans"; font.pixelSize: 11; font.weight: Font.Medium; color: Theme.textMain
                                             renderType: Text.NativeRendering
                                         }
                                         MouseArea {
@@ -448,12 +436,11 @@ PanelWindow {
                                     }
 
                                     Rectangle {
-                                        Layout.fillWidth: true; height: 24; radius: 4
+                                        Layout.fillWidth: true; height: 26; radius: 8
                                         color: showPassArea.containsMouse ? Theme.bgDark : Theme.bgMain
-                                        border.color: Theme.info; border.width: 1
-                                        Text {
+                                                                                Text {
                                             anchors.centerIn: parent; text: "Password"
-                                            font.family: "Noto Sans"; font.pixelSize: 10; color: Theme.info
+                                            font.family: "Google Sans"; font.pixelSize: 11; font.weight: Font.Medium; color: Theme.info
                                             renderType: Text.NativeRendering
                                         }
                                         MouseArea {
@@ -475,8 +462,8 @@ PanelWindow {
                                     visible: delegateRect.netInUse && root.fetchedPassword !== ""
                                     Layout.fillWidth: true
                                     text: "> " + root.fetchedPassword
-                                    font.family: "Noto Sans"
-                                    font.pixelSize: 10
+                                    font.family: "Google Sans"
+                                    font.pixelSize: 11
                                     color: Theme.warning
                                     wrapMode: Text.Wrap
                                     renderType: Text.NativeRendering
@@ -489,16 +476,15 @@ PanelWindow {
 
                                     Rectangle {
                                         visible: delegateRect.netIsSecure
-                                        Layout.fillWidth: true; height: 24; radius: 4
+                                        Layout.fillWidth: true; height: 26; radius: 8
                                         color: Theme.bgMain
-                                        border.color: Theme.border; border.width: 1
-
+                                        
                                         TextInput {
                                             id: passInput
                                             anchors.fill: parent
                                             anchors.leftMargin: 6; anchors.rightMargin: 6
                                             verticalAlignment: TextInput.AlignVCenter
-                                            font.family: "Noto Sans"; font.pixelSize: 10
+                                            font.family: "Google Sans"; font.pixelSize: 11
                                             color: Theme.textMain
                                             echoMode: TextInput.Password
                                             clip: true
@@ -519,12 +505,11 @@ PanelWindow {
                                     }
 
                                     Rectangle {
-                                        Layout.fillWidth: true; height: 24; radius: 4
+                                        Layout.fillWidth: true; height: 26; radius: 8
                                         color: connectArea.containsMouse ? Theme.accent : Theme.bgMain
-                                        border.color: Theme.accent; border.width: 1
-                                        Text {
+                                                                                Text {
                                             anchors.centerIn: parent; text: "Connect"
-                                            font.family: "Noto Sans"; font.pixelSize: 10;
+                                            font.family: "Google Sans"; font.pixelSize: 11; font.weight: Font.Medium;
                                             color: connectArea.containsMouse ? Theme.bgMain : Theme.accent
                                             renderType: Text.NativeRendering
                                         }
@@ -563,14 +548,10 @@ PanelWindow {
 
                     Rectangle {
                         width: vpnRow.implicitWidth + 20
-                        height: 26
-                        radius: 6
+                        height: 28
+                        radius: 10
                         color: root.vpnState === "connected" ? Theme.accent : (vpnArea.containsMouse ? Theme.bgDark : "transparent")
-                        border.color: root.vpnState === "connected" ? Theme.accent : Theme.border
-                        border.width: 1
-
                         Behavior on color { ColorAnimation { duration: 150 } }
-                        Behavior on border.color { ColorAnimation { duration: 150 } }
 
                         RowLayout {
                             id: vpnRow
@@ -587,9 +568,9 @@ PanelWindow {
 
                             Text {
                                 text: root.vpnState === "connected" ? "VPN ON" : (root.vpnState === "unregistered" ? "Register VPN" : "VPN OFF")
-                                font.family: "Noto Sans"
-                                font.pixelSize: 10
-                                font.bold: true
+                                font.family: "Google Sans"
+                                font.pixelSize: 11
+                                font.weight: Font.Medium
                                 color: root.vpnState === "connected" ? Theme.bgMain : Theme.textMain
                                 renderType: Text.NativeRendering
                             }
@@ -623,28 +604,6 @@ PanelWindow {
             }
         }
 
-        Item {
-            anchors.top: mainBox.top
-            anchors.right: mainBox.left
-            width: 15; height: 15; clip: true
-            Rectangle {
-                width: 60; height: 60; radius: 30
-                color: "transparent"
-                border.color: Theme.bgMain; border.width: 15
-                x: -30; y: -15
-            }
-        }
 
-        Item {
-            anchors.top: mainBox.top
-            anchors.left: mainBox.right
-            width: 15; height: 15; clip: true
-            Rectangle {
-                width: 60; height: 60; radius: 30
-                color: "transparent"
-                border.color: Theme.bgMain; border.width: 15
-                x: -15; y: -15
-            }
-        }
     }
 }

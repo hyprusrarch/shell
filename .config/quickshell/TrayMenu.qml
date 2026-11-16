@@ -51,8 +51,8 @@ PanelWindow {
     property real contentW: menuLayout.implicitWidth + 16
     property real contentH: menuLayout.implicitHeight + 16
 
-    property real calculatedWidth: Math.min(menuWindow.width - 20, Math.max(150, contentW))
-    property real calculatedHeight: Math.min(menuWindow.height - targetY - 20, contentH)
+    property real calculatedWidth: Math.min(menuWindow.width - 24, Math.max(180, contentW))
+    property real calculatedHeight: Math.min(menuWindow.height - targetY - 24, contentH)
 
     property real targetX: isSubmenu ? anchorX : (anchorX + 8) - (calculatedWidth / 2)
     property real safeX: Math.max(0, Math.min(menuWindow.width - calculatedWidth, targetX))
@@ -60,7 +60,7 @@ PanelWindow {
     Item {
         id: layerWrapper
         x: safeX
-        y: -calculatedHeight - 20
+        y: -calculatedHeight - 24
         width: calculatedWidth
         height: calculatedHeight
 
@@ -89,7 +89,7 @@ PanelWindow {
             id: mainBox
             anchors.fill: parent
             color: Theme.bgMain
-            radius: 12
+            radius: 14
             border.width: 0
             clip: true
 
@@ -98,7 +98,7 @@ PanelWindow {
             Rectangle {
                 visible: !menuWindow.isSubmenu
                 width: parent.width
-                height: 12
+                height: 14
                 anchors.top: parent.top
                 color: Theme.bgMain
             }
@@ -111,7 +111,7 @@ PanelWindow {
             Flickable {
                 id: scrollArea
                 anchors.fill: parent
-                anchors.margins: 8
+                anchors.margins: 10
                 contentWidth: menuLayout.implicitWidth
                 contentHeight: menuLayout.implicitHeight
                 clip: true
@@ -128,8 +128,8 @@ PanelWindow {
                         delegate: Rectangle {
                             required property var modelData
                             Layout.fillWidth: true
-                            implicitHeight: modelData.isSeparator ? 9 : 26
-                            radius: 6
+                            implicitHeight: modelData.isSeparator ? 11 : 31
+                            radius: 7
                             color: (!modelData.isSeparator && btnArea.containsMouse) ? Theme.bgDark : "transparent"
 
                             Rectangle {
@@ -143,14 +143,14 @@ PanelWindow {
                             RowLayout {
                                 visible: !modelData.isSeparator
                                 anchors.fill: parent
-                                anchors.margins: 6
-                                spacing: 8
+                                anchors.margins: 7
+                                spacing: 10
 
                                 Text {
                                     Layout.fillWidth: true
                                     text: modelData.text || ""
                                     color: Theme.textMain
-                                    font.pixelSize: 11
+                                    font.pixelSize: 13
                                     font.family: "Noto Sans"
                                     renderType: Text.NativeRendering
                                     textFormat: Text.PlainText
@@ -160,7 +160,7 @@ PanelWindow {
                                     visible: modelData.hasChildren
                                     text: "▶"
                                     color: Theme.textMuted
-                                    font.pixelSize: 9
+                                    font.pixelSize: 11
                                     renderType: Text.NativeRendering
                                     textFormat: Text.PlainText
                                 }
@@ -199,19 +199,19 @@ PanelWindow {
             visible: !menuWindow.isSubmenu
             anchors.top: mainBox.top
             anchors.right: mainBox.left
-            width: 15
-            height: 15
+            width: 18
+            height: 18
             clip: true
 
             Rectangle {
-                width: 60
-                height: 60
-                radius: 30
+                width: 72
+                height: 72
+                radius: 36
                 color: "transparent"
                 border.color: Theme.bgMain
-                border.width: 15
-                x: -30
-                y: -15
+                border.width: 18
+                x: -36
+                y: -18
             }
         }
 
@@ -219,19 +219,19 @@ PanelWindow {
             visible: !menuWindow.isSubmenu
             anchors.top: mainBox.top
             anchors.left: mainBox.right
-            width: 15
-            height: 15
+            width: 18
+            height: 18
             clip: true
 
             Rectangle {
-                width: 60
-                height: 60
-                radius: 30
+                width: 72
+                height: 72
+                radius: 36
                 color: "transparent"
                 border.color: Theme.bgMain
-                border.width: 15
-                x: -15
-                y: -15
+                border.width: 18
+                x: -18
+                y: -18
             }
         }
     }
@@ -249,7 +249,6 @@ PanelWindow {
             }
             childMenuLoader.active = false;
             childMenu = null;
-            gc();
-        }
+            }
     }
 }

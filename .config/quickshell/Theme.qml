@@ -35,6 +35,7 @@ QtObject {
 
   property color background: bgMain
   property color foreground: textMain
+  readonly property bool isDark: (bgMain.r * 0.299 + bgMain.g * 0.587 + bgMain.b * 0.114) < 0.5
 
 
   property Process hyprlockWriter: Process {
@@ -94,19 +95,29 @@ QtObject {
         let m3 = JSON.parse(buffer);
         let c = m3.colors;
 
-        root.bgMain    = c.surface.dark.color;
-        root.bgDark    = c.surface_container.dark.color;
-        root.textMain  = c.on_surface.dark.color;
-        root.textMuted = c.outline.dark.color;
+        const scheme = Qt.styleHints.colorScheme === Qt.ColorScheme.Light ? "light" : "dark";
+        const colorFor = (role) => {
+          const entry = c[role];
+          if (!entry) return "#ffffff";
+          if (entry[scheme] && entry[scheme].color) return entry[scheme].color;
+          if (entry.dark && entry.dark.color) return entry.dark.color;
+          if (entry.color) return entry.color;
+          return "#ffffff";
+        };
 
-        root.accent    = c.primary.dark.color;
-        root.accentAlt = c.tertiary.dark.color;
-        root.border    = Qt.darker(c.outline_variant.dark.color, 1.25);
+        root.bgMain    = colorFor("surface");
+        root.bgDark    = colorFor("surface_container");
+        root.textMain  = colorFor("on_surface");
+        root.textMuted = colorFor("outline");
 
-        root.error     = c.error.dark.color;
-        root.warning   = c.secondary.dark.color;
-        root.success   = c.primary_fixed.dark.color;
-        root.info      = c.tertiary_fixed.dark.color;
+        root.accent    = colorFor("primary");
+        root.accentAlt = colorFor("tertiary");
+        root.border    = Qt.darker(colorFor("outline_variant"), 1.25);
+
+        root.error     = colorFor("error");
+        root.warning   = colorFor("secondary");
+        root.success   = colorFor("primary_fixed");
+        root.info      = colorFor("tertiary_fixed");
 
         // Push M3 colors to Hyprlock
         root.updateHyprlockColors();
@@ -123,6 +134,15 @@ QtObject {
     onTriggered: {
       readM3.running = false;
       readM3.running = true;
+    }
+  }
+
+  // QtObject has no default child property. Keep the connection as an
+  // explicitly declared object property so the singleton loads correctly.
+  property Connections styleHintsConnection: Connections {
+    target: Qt.styleHints
+    function onColorSchemeChanged() {
+      if (root.currentTheme === "adaptive") root.m3Debounce.restart();
     }
   }
 
